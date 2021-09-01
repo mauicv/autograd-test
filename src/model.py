@@ -1,10 +1,10 @@
-import numpy as np
-from layer import Layer
+from functions import Mse
 
 
 class Model:
     def __init__(self):
         self.layers = []
+        self.loss_fn = None
 
     def add_layer(self, layer):
         if self.layers:
@@ -17,25 +17,25 @@ class Model:
         for layer in layers:
             self.add_layer(layer)
 
-    def forward(self, x):
+    def __call__(self, x):
         for layer in self.layers:
             x = layer.forward(x)
         return x
 
-    def backward(self):
-        # fails becuase last row hasn't computed dl_dx yet
+    def forward(self, x, y):
+        for layer in self.layers:
+            x = layer.forward(x)
+        loss = self.loss_fn(x, y)
+        dl_dx = self.loss_fn.d(x, y)
+        grads = self.backward(dl_dx)
+        return loss, grads
+
+    def backward(self, dl_dx):
+        grads = []
         for layer in self.layers[::-1]:
-            layer.backward()
+            dl_dx = layer.backward(dl_dx)
+            grads.append((layer.dl_dw, layer.dl_db))
+        return grads
 
-
-if __name__ == "__main__":
-    model = Model()
-    layer1 = Layer(10, 10)
-    layer2 = Layer(10, 10)
-    layer3 = Layer(10, 10)
-    layer4 = Layer(10, 10)
-
-    model.add_layers([layer1, layer2, layer3, layer4])
-    layer = layer1
-    print(model.forward(np.ones(10)))
-    model.backward()
+    def compile(self, loss=Mse()):
+        self.loss_fn = loss

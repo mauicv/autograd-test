@@ -22,6 +22,11 @@ class Var:
     def __str__(self):
         return f'<val: {str(self.val)}, dot: {str(self.dot)}>'
 
+    def relu(self):
+        val = self.val * (self.val > 0)
+        dot = 1 * (self.val > 0)
+        return Var(val, dot)
+
 
 if __name__ == "__main__":
     v1 = Var(1, 1)

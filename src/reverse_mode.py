@@ -22,6 +22,12 @@ class Var:
         self.dot = None
 
     def new_node(self, w, dw, other):
+        """new_node
+
+        Note that this function assumes 2 - 1 operations such as addition,
+        subtraction, multiplication, division. Will not work with functional
+        application.
+        """
         self.tape.add([self, other])
         dw_self, dw_other = dw
         name = f'({self.name}) o ({other.name})'

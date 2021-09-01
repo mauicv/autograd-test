@@ -1,16 +1,15 @@
 import numpy as np
-from activations import relu, DERIV_MAP
+from functions import Relu
 
 
 class Layer:
     def __init__(self,
                  input_shape,
                  output_shape,
-                 activation=relu):
+                 activation=Relu()):
         self.W = np.ones((input_shape, output_shape))
         self.b = np.ones((output_shape))
         self.a = activation
-        self.da = DERIV_MAP[self.a]
         self.next_layer = None
         self.last_layer = None
 
@@ -31,22 +30,23 @@ class Layer:
             self.y[i] = self.a(self.B[i])
         return self.y
 
-    def backward(self):
+    def backward(self, dln_dx):
         # todo: Recombine all these terms within two for loops at most
 
-        dln_dx = self.next_layer.dl_dx
         for i in range(len(self.B)):
             for j in range(len(self.B)):
-                self.dl_dw[i][j] = self.x[i] * self.da(self.B[j]) * dln_dx[j]
+                self.dl_dw[i][j] = self.x[i] * self.a.d(self.B[j]) * dln_dx[j]
 
         for j in range(len(self.B)):
-            self.dl_db[j] = self.da(self.B[j]) * dln_dx[j]
+            self.dl_db[j] = self.a.d(self.B[j]) * dln_dx[j]
 
         for i in range(len(self.B)):
             self.dl_dx[i] = 0
             w = self.W[i]
             for j in range(len(self.B)):
-                self.dl_dx[i] += self.da(self.B[j]) * w[j] * dln_dx[j]
+                self.dl_dx[i] += self.a.d(self.B[j]) * w[j] * dln_dx[j]
+
+        return self.dl_dx
 
     def __call__(self, x):
         outs = self.W @ x + self.b
@@ -56,6 +56,6 @@ class Layer:
 
 
 if __name__ == "__main__":
-    layer = Layer(10, 10)
-    print(layer.forward(np.ones(10)))
-    print(layer.backward())
+    layer = Layer(2, 2)
+    print(layer.forward(np.ones(2)))
+    print(layer.backward(np.ones(2)))
