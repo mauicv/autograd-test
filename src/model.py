@@ -1,4 +1,4 @@
-from functions import Mse
+from src.functions import Mse
 
 
 class Model:
@@ -19,7 +19,7 @@ class Model:
 
     def __call__(self, x):
         for layer in self.layers:
-            x = layer.forward(x)
+            x = layer(x)
         return x
 
     def forward(self, x, y):

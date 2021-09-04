@@ -1,4 +1,5 @@
 # import os
+import numpy as np
 import torch
 from torch import nn
 from torch.nn.functional import relu
@@ -24,3 +25,13 @@ class NeuralNetwork(nn.Module):
             x = relu(x @ W.T + b)
         W, b = self.layers[-1]
         return x @ W.T + b
+
+
+if __name__ == "__main__":
+    model = NeuralNetwork()
+    model.add_layer(
+        weights=np.array([[1.0, 1.0], [1.0, 1.0], [1.0, 1.0]]),
+        biases=np.array([1.0, 1.0, 1.0])
+    )
+    o = model(torch.tensor([1.0, 1.0]))
+    print(o)

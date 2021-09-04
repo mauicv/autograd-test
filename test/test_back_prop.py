@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import torch
 from torch import nn
-from torch_net import NeuralNetwork
+from test.torch_net import NeuralNetwork
 from src.model import Model
 from src.layer import Layer
 from src.functions import Linear
@@ -11,8 +11,8 @@ from src.functions import Linear
 
 class ReverseModeTests(unittest.TestCase):
     def test_correct_derivative_simple(self):
-        input = [1.0, 1.0, 1.0]
-        output = [1.0, 1.0, 1.0]
+        input = [1.0, 0.0, 1.4]
+        output = [1.0, 0.5, -1.0]
         layer_dims = [3, 3, 3, 3, 3]
 
         X = np.array(input)
@@ -22,7 +22,8 @@ class ReverseModeTests(unittest.TestCase):
 
         # Model:
         model = Model()
-        layers = [Layer(d1, d2) for d1, d2 in zip(layer_dims, layer_dims[2:])]
+        layers = [Layer(d1, d2) for d1, d2
+                  in zip(layer_dims[:-1], layer_dims[1:-1])]
         last_layer = Layer(layer_dims[-2], layer_dims[-1], activation=Linear())
         layers.append(last_layer)
 
