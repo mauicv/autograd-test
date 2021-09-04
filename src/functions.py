@@ -52,4 +52,4 @@ class Mse:
         return ((x - y)**2).mean()
 
     def d(self, x, y):
-        return 2*(x**2 - y)/len(y)
+        return 2*(x - y)/len(y)

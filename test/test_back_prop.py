@@ -6,52 +6,54 @@ from torch_net import NeuralNetwork
 from src.model import Model
 from src.layer import Layer
 from src.functions import Linear
+# from util import print_layer_weights
 
 
 class ReverseModeTests(unittest.TestCase):
-    def test_correct_derivative(self):
-        torch_model = NeuralNetwork()
-        X = torch.tensor([[1., 1.]])
-        Y = torch.tensor([[0., 0.]])
-        torch_out = torch_model(X)
-        loss = nn.MSELoss()
-        torch_loss = loss(torch_out, Y)
-        torch_loss.backward()
+    def test_correct_derivative_simple(self):
+        input = [1.0, 1.0, 1.0]
+        output = [1.0, 1.0, 1.0]
+        layer_dims = [3, 3, 3, 3, 3]
 
-        # for w, b in [torch_model.l1.weight.grad,
-        #              torch_model.l1.bias.grad,
-        #              torch_model.l2.weight.grad,
-        #              torch_model.l2.bias.grad,
-        #              torch_model.o.weight.grad,
-        #              torch_model.o.bias.grad]:
-        #     print(w.tolist(), b.tolist())
+        X = np.array(input)
+        Y = np.array(output)
+        X_t = torch.tensor(X)
+        Y_t = torch.tensor(Y)
 
         # Model:
         model = Model()
-        layers = [Layer(2, 2) for _ in range(2)]
-        output_layer = [Layer(2, 2, activation=Linear())]
-        layers = layers + output_layer
-        layers[0].W = torch_model.l1.weight.detach().numpy()
-        layers[0].b = torch_model.l1.bias.detach().numpy()
-        layers[1].W = torch_model.l2.weight.detach().numpy()
-        layers[1].b = torch_model.l2.bias.detach().numpy()
-        layers[2].W = torch_model.o.weight.detach().numpy()
-        layers[2].b = torch_model.o.bias.detach().numpy()
+        layers = [Layer(d1, d2) for d1, d2 in zip(layer_dims, layer_dims[2:])]
+        last_layer = Layer(layer_dims[-2], layer_dims[-1], activation=Linear())
+        layers.append(last_layer)
+
+        torch_model = NeuralNetwork()
+        torch_model.add_layers([(l.W, l.b) for l in layers])
+
         model.add_layers(layers)
         model.compile()
 
-        x = np.ones(2)
-        y = np.zeros(2)
+        torch_out = torch_model(X_t)
+        loss = nn.MSELoss()
+        torch_loss = loss(torch_out, Y_t)
+        torch_loss.backward()
 
-        for a, b in zip(torch_out.tolist()[0], model(x)):
-            self.assertEqual(round(a, 5), round(b, 5))
-
-        loss, grads = model.forward(x, y)
-
+        torch_numpy_out = torch_out.detach().numpy()
+        model_out = model(X)
+        self.assertEqual(torch_numpy_out.shape, model_out.shape)
+        np.testing.assert_almost_equal(torch_numpy_out, model_out)
+        loss, grads = model.forward(X, Y)
         self.assertEqual(round(loss, 5), round(torch_loss.tolist(), 5))
 
-        # for w, b in grads:
-        #     print(w.tolist(), b.tolist())
+        # print_layer_weights(torch_model.layers, layers)
+
+        for i, ((W, b), layer) in \
+                enumerate(zip(torch_model.layers, layers)):
+            torch_dw = W.grad.detach().numpy()
+            torch_db = b.grad.detach().numpy()
+            np.testing.assert_almost_equal(layer.dl_dw, torch_dw)
+            np.testing.assert_almost_equal(layer.dl_db, torch_db)
+            self.assertEqual(layer.dl_dw.shape, torch_dw.shape)
+            self.assertEqual(layer.dl_db.shape, torch_db.shape)
 
 
 if __name__ == '__main__':
