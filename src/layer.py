@@ -36,13 +36,9 @@ class Layer:
         return self.y
 
     def backward(self, dln_dx):
-        # todo: Recombine all these terms within two for loops at most
-
-        for i in range(self.input_shape):
-            for j in range(self.output_shape):
-                self.dl_dw[j][i] = self.x[i] * self.a.d(self.B[j]) * dln_dx[j]
-
         for j in range(self.output_shape):
+            for i in range(self.input_shape):
+                self.dl_dw[j][i] = self.x[i] * self.a.d(self.B[j]) * dln_dx[j]
             self.dl_db[j] = self.a.d(self.B[j]) * dln_dx[j]
 
         for i in range(self.input_shape):

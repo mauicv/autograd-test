@@ -30,12 +30,7 @@ def xor_data_gen(num=10):
 
 
 def fn_data_gen(num=10):
-    x = np.random.uniform(low=0, high=1, size=num)
-    y = np.random.uniform(low=0, high=1, size=num)
+    x = np.random.uniform(low=-1, high=1, size=num)
+    y = np.random.uniform(low=-1, high=1, size=num)
     fxy = (x**2 + y**2)/2
     return zip(np.stack([x, y], axis=1), fxy[:, None])
-
-
-if __name__ == "__main__":
-    for a, b in fn_data_gen():
-        print(a, b)

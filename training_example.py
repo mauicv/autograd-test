@@ -5,10 +5,15 @@ from test.util import fn_data_gen
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from matplotlib import cm
 
 
 if __name__ == '__main__':
-    layer_dims = [2, 10, 10, 1]
+    layer_dims = [2, 30, 30, 1]
+    losses = []
+    batch_size = 32
+    training_steps = 20000
+    count = 0
 
     # Model:
     model = Model()
@@ -20,13 +25,8 @@ if __name__ == '__main__':
     model.add_layers(layers)
     model.compile()
 
-    losses = []
-    batch_size = 32
-    training_steps = 10000
-    count = 0
-
     with tqdm(total=training_steps) as pbar:
-        for X, Y in tqdm(fn_data_gen(training_steps)):
+        for X, Y in fn_data_gen(training_steps):
             pbar.update(1)
             if (count % batch_size) == 0:
                 grad_avg = [(np.zeros_like(layer.W), np.zeros_like(layer.b))
@@ -59,4 +59,19 @@ if __name__ == '__main__':
               'error:', (Y_pred-Y).round(3)[0])
 
     plt.plot(losses[1:])
+    plt.show()
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, subplot_kw={"projection": "3d"})
+    X = np.arange(-1, 1, 0.025)
+    Y = np.arange(-1, 1, 0.025)
+    X, Y = np.meshgrid(X, Y)
+    Z = (X**2 + Y**2)/2
+    surf = ax1.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+                            linewidth=0, antialiased=False)
+
+    Z = np.array([model(np.array([x, y])) for x, y
+                  in zip(np.ravel(X), np.ravel(Y))])
+    Z = Z.reshape(X.shape)
+    surf = ax2.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+                            linewidth=0, antialiased=False)
     plt.show()
