@@ -7,7 +7,9 @@ Example implementation of reverse mode automatic differentiation for deep neural
 
 
 ![Training loss plot](assets/auto-grad-training-example.png)
+
 Loss over 20000 training steps of a network aiming to model the 2 dimensional function on the left bellow. The plot on the right is the model output.
+
 ![True output and model output](assets/auto-grad-model-output.png)
 
 
