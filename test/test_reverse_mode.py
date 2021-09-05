@@ -1,5 +1,5 @@
 import unittest
-from src.reverse_mode import Var as VarRM
+from src.reverse_mode import Var as VarRM, Tape
 from src.forward_mode import Var as VarFD
 import torch
 
@@ -24,12 +24,13 @@ class BackPropTests(unittest.TestCase):
         do_dy_for = out1.dot
 
         # reverse_mode
-        x = VarRM(2, name='x')
-        y = VarRM(1, name='y')
-        output = (x + y) * x + (x * x * x)
-        do_dy_rev, do_dx_rev = output.compute_grad()[-2:]
+        x, y = (VarRM(2), VarRM(1))
+        tape = Tape()
+        tape.watch([x, y])
+        (x + y) * x + (x * x * x)
+        tape.compute_grads()
         self.assertEqual(
-            (do_dx_rev, do_dy_rev),
+            (x.df_dn, y.df_dn),
             (do_dx_for, do_dy_for),
             torch_grads
         )
