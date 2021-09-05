@@ -42,7 +42,7 @@ class ReverseModeTests(unittest.TestCase):
         model_out = model(X)
         self.assertEqual(torch_numpy_out.shape, model_out.shape)
         np.testing.assert_almost_equal(torch_numpy_out, model_out)
-        loss, grads = model.forward(X, Y)
+        loss, grads = model.compute_grads(X, Y)
         self.assertEqual(round(loss, 5), round(torch_loss.tolist(), 5))
 
         # print_layer_weights(torch_model.layers, layers)

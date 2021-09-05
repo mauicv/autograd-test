@@ -32,7 +32,7 @@ if __name__ == '__main__':
                 grad_avg = [(np.zeros_like(layer.W), np.zeros_like(layer.b))
                             for layer in model.layers[::-1]]
             count += 1
-            loss, grads = model.forward(X, Y)
+            loss, grads = model.compute_grads(X, Y)
             for (avg_w_grad, avg_b_grad), (weight_grads, bias_grads) \
                     in zip(grad_avg, grads):
                 avg_w_grad += weight_grads

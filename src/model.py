@@ -26,16 +26,20 @@ class Model:
         for layer in self.layers:
             x = layer.forward(x)
         loss = self.loss_fn(x, y)
-        dl_dx = self.loss_fn.d(x, y)
-        grads = self.backward(dl_dx)
-        return loss, grads
+        return x, loss
 
-    def backward(self, dl_dx):
+    def backward(self, y_pred, y_true):
+        dl_dx = self.loss_fn.d(y_pred, y_true)
         grads = []
         for layer in self.layers[::-1]:
             dl_dx = layer.backward(dl_dx)
             grads.append((layer.dl_dw, layer.dl_db))
         return grads
+
+    def compute_grads(self, x, y):
+        y_pred, loss = self.forward(x, y)
+        grads = self.backward(y_pred, y)
+        return loss, grads
 
     def compile(self, loss=Mse()):
         self.loss_fn = loss

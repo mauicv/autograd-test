@@ -32,5 +32,5 @@ model.compile()
 
 X = np.uniform.random(-1, 1, 2)
 Y = np.uniform.random(-1, 1, 1)
-loss, grads = model.forward(X, Y)
+loss, grads = model.compute_grads(X, Y)
 ```
